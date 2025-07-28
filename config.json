@@ -1,0 +1,12 @@
+{
+  "arxiv_keywords": [
+    "MOD-PC",
+    "control systems",
+    "digital twins",
+    "edge AI",
+    "robotics",
+    "human-computer interaction"
+  ],
+  "arxiv_max_results_per_run": 20,
+  "sleep_duration_hours": 4
+}

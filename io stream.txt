@@ -1,0 +1,23 @@
+io stream 
+#include <iostream>
+using namespace std;
+
+void drawParallelLines(int length) {
+    for (int i = 0; i < length; i++) {
+        cout << "|   |" << endl;
+    }
+}
+
+int main() {
+    int length;
+    cout << "Enter the number of lines to draw: ";
+    cin >> length;
+
+    if (length > 0) {
+        drawParallelLines(length);
+    } else {
+        cout << "Please enter a positive number." << endl;
+    }
+
+    return 0;
+}
