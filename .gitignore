@@ -45,5 +45,6 @@ celerybeat-schedule
 .ruff_cache
 
 # Specific to this project
-.env                 # Ignore the file containing your sensitive API keys
-logged_papers.csv    # Ignore the local CSV log file
+.env                 # Ignore the file for environment variables (a good practice)
+logged_papers.csv    # Ignore the old local CSV log file
+papers.db            # Ignore the new SQLite database file
