@@ -2,3 +2,4 @@ arxiv
 pyairtable
 python-dotenv
 flask
+gunicorn
