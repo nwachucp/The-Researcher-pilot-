@@ -9,10 +9,7 @@ from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 import threading
 
-<<<<<<< HEAD
-=======
 
->>>>>>> fa5f93cd5b44f5ab26c7a0e19efc52d94850a492
 app = Flask(__name__)
 # defining the name of my SQLite database file
 DATABASE = 'papers.db'
@@ -25,7 +22,6 @@ def init_db():
     with sqlite3.connect(DATABASE) as conn:
         cursor = conn.cursor()
         # SQL command to create the 'papers' table.
-        # IF NOT EXISTS prevents errors if the table already exists.
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS papers (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,11 +49,6 @@ def insert_paper(paper_data):
                 INSERT INTO papers (title, authors, published_date, summary, arxiv_url, pdf_url, arxiv_id, timestamp)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
-<<<<<<< HEAD
-                
-=======
-              
->>>>>>> fa5f93cd5b44f5ab26c7a0e19efc52d94850a492
                 paper_data['Title'],
                 paper_data['Authors'],
                 paper_data['Published Date'],
@@ -114,11 +105,7 @@ def save_config(config, config_path='config.json'):
     except Exception as e:
         print(f"Error saving config file: {e}")
 
-<<<<<<< HEAD
-# ArXiv Search Function
-=======
-# arXiv Search Function
->>>>>>> fa5f93cd5b44f5ab26c7a0e19efc52d94850a492
+
 def search_arxiv(keywords, max_results):
     """Searches ArXiv for papers based on provided keywords."""
     # formats the keywords into a query string for the ArXiv API
@@ -140,7 +127,6 @@ def search_arxiv(keywords, max_results):
         print(f"An error occurred during ArXiv search: {e}")
     return results
 
-<<<<<<< HEAD
 # function to perform a search and log the papers.
 def perform_search_and_log(keywords, max_results):
     """Performs an ArXiv search and logs new papers to the database."""
@@ -181,8 +167,6 @@ def get_last_run_timestamp():
             return f.read().strip()
     return None
 
-=======
->>>>>>> fa5f93cd5b44f5ab26c7a0e19efc52d94850a492
 # bot's main continuous loop function 
 def run_scheduled_bot():
     """
@@ -259,7 +243,6 @@ def fetch_and_log():
     return redirect(url_for('index'))
 
 if __name__ == "__main__":
-<<<<<<< HEAD
     
     # starts the bot thread
     init_db()
@@ -269,17 +252,6 @@ if __name__ == "__main__":
     
     
     print("Starting Flask Research Paper Bot...")
-    # starts my web server
-    app.run(debug=True)
-
-=======
-    
-    bot_thread = threading.Thread(target=run_scheduled_bot)
-    
-    bot_thread.start()
-    
-    init_db()
-    print("Starting Flask Research Paper Bot...")
     # running the Flask development server in the main thread
     app.run(debug=True, host='0.0.0.0', port=5000)
->>>>>>> fa5f93cd5b44f5ab26c7a0e19efc52d94850a492
+
