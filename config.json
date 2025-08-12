@@ -1,8 +1,5 @@
 {
-    "arxiv_keywords": [
-        "control systems",
-        "computer engineering"
-    ],
+    "arxiv_keywords": [],
     "arxiv_max_results_per_run": 20,
     "sleep_duration_hours": 4
 }

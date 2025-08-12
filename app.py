@@ -7,20 +7,17 @@ import csv
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
-# NEW: Import the threading module to run the bot in a separate process
 import threading
 
-# --- Flask Application Setup ---
-# Initialize the Flask application
 app = Flask(__name__)
-# Define the name of the SQLite database file
+# defining the name of my SQLite database file
 DATABASE = 'papers.db'
+LAST_RUN_TIMESTAMP_FILE = 'last_run_timestamp.txt'
 
-# --- Database Functions ---
-# These functions handle all interactions with the SQLite database.
+# database functions
 
 def init_db():
-    """Initializes the SQLite database and creates the papers table if it doesn't exist."""
+    """initializes the SQLite database and creates the papers table if it doesn't exist."""
     with sqlite3.connect(DATABASE) as conn:
         cursor = conn.cursor()
         # SQL command to create the 'papers' table.
@@ -38,7 +35,7 @@ def init_db():
                 timestamp TEXT NOT NULL
             )
         ''')
-        # Commit the changes to the database
+        # commit the changes to the database
         conn.commit()
     print(f"Database '{DATABASE}' initialized successfully.")
 
@@ -52,7 +49,7 @@ def insert_paper(paper_data):
                 INSERT INTO papers (title, authors, published_date, summary, arxiv_url, pdf_url, arxiv_id, timestamp)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
-                # The values to be inserted, corresponding to the '?' placeholders
+                
                 paper_data['Title'],
                 paper_data['Authors'],
                 paper_data['Published Date'],
@@ -66,27 +63,26 @@ def insert_paper(paper_data):
             print(f" (Logged to DB: {paper_data['Title']})")
             return True
         except sqlite3.IntegrityError as e:
-            # This block handles the error if a paper with the same arxiv_url or arxiv_id already exists
+            # makes sure paper isn't logged more than once
             print(f"Skipping already logged paper (DB check): {paper_data['Title']} - {e}")
             return False
         except Exception as e:
-            # General error handling for any other issues during insertion
             print(f"Error logging to DB: {e}")
             return False
 
 def get_all_papers():
     """Retrieves all paper records from the database."""
     with sqlite3.connect(DATABASE) as conn:
-        # Set the row_factory to sqlite3.Row to get dictionary-like objects
+        # set the row_factory to sqlite3.Row to get dictionary-like objects
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         # SQL command to select all papers, ordered by published date in descending order
         cursor.execute('SELECT * FROM papers ORDER BY published_date DESC')
-        # Convert the fetched rows into a list of dictionaries
+        # convert the fetched rows into a list of dictionaries
         return [dict(row) for row in cursor.fetchall()]
 
-# --- Configuration Functions ---
-# These functions manage the 'config.json' file for keywords and settings.
+# config function
+# these functions manage the 'config.json' file for keywords and settings.
 
 def load_config(config_path='config.json'):
     """Loads configuration settings from a JSON file."""
@@ -110,13 +106,13 @@ def save_config(config, config_path='config.json'):
     except Exception as e:
         print(f"Error saving config file: {e}")
 
-# --- ArXiv Search Function ---
+# ArXiv Search Function
 def search_arxiv(keywords, max_results):
     """Searches ArXiv for papers based on provided keywords."""
-    # Format the keywords into a query string for the ArXiv API
+    # formats the keywords into a query string for the ArXiv API
     query_string = " OR ".join([f"all:{keyword}" for keyword in keywords])
     client = arxiv.Client()
-    # Create a search object with the specified query, max results, and sorting
+    # create a search object with the specified query, max results, and sorting
     search = arxiv.Search(
         query=query_string,
         max_results=max_results,
@@ -132,14 +128,54 @@ def search_arxiv(keywords, max_results):
         print(f"An error occurred during ArXiv search: {e}")
     return results
 
-# --- NEW: Bot's main continuous loop function ---
+# function to perform a search and log the papers.
+def perform_search_and_log(keywords, max_results):
+    """Performs an ArXiv search and logs new papers to the database."""
+    print(f"Searching ArXiv for papers with keywords: {', '.join(keywords)} (Max results: {max_results})")
+    papers_found = search_arxiv(keywords, max_results)
+    print(f"Found {len(papers_found)} potential new papers.")
+    
+    papers_logged_this_run = 0
+    for paper in papers_found:
+        paper_data = {
+            "Title": paper.title,
+            "Authors": ", ".join([a.name for a in paper.authors]),
+            "Published Date": paper.published.strftime('%Y-%m-%d %H:%M:%S'),
+            "Summary": paper.summary,
+            "ArXiv URL": paper.entry_id,
+            "PDF URL": paper.pdf_url if paper.pdf_url else "",
+            "ArXiv ID": paper.entry_id.split('/')[-1],
+            "Timestamp": datetime.now().isoformat()
+        }
+        if insert_paper(paper_data):
+            papers_logged_this_run += 1
+            
+    print(f"Logged {papers_logged_this_run} new papers.")
+    save_last_run_timestamp()
+
+
+# functions to handle the last run timestamp
+def save_last_run_timestamp():
+    """Saves the current timestamp to a file."""
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open(LAST_RUN_TIMESTAMP_FILE, 'w') as f:
+        f.write(timestamp)
+
+def get_last_run_timestamp():
+    """Retrieves the last run timestamp from a file."""
+    if os.path.exists(LAST_RUN_TIMESTAMP_FILE):
+        with open(LAST_RUN_TIMESTAMP_FILE, 'r') as f:
+            return f.read().strip()
+    return None
+
+# bot's main continuous loop function 
 def run_scheduled_bot():
     """
     This function contains the main loop for the bot.
     It will run a search, log papers, and then sleep for a set duration.
     This runs in a separate thread so it doesn't block the web server.
     """
-    # Load environment variables just for this thread
+    # loads environment variables just for this thread
     load_dotenv() 
 
     while True:
@@ -156,27 +192,8 @@ def run_scheduled_bot():
             if not arxiv_keywords:
                 print("Error: 'arxiv_keywords' not found or empty in config.json. Skipping this run.")
             else:
-                print(f"Searching ArXiv for papers with keywords: {', '.join(arxiv_keywords)} (Max results: {arxiv_max_results})")
-                papers_found = search_arxiv(arxiv_keywords, arxiv_max_results)
-                print(f"Found {len(papers_found)} potential new papers.")
-                
-                papers_logged_this_run = 0
-                for paper in papers_found:
-                    paper_data = {
-                        "Title": paper.title,
-                        "Authors": ", ".join([a.name for a in paper.authors]),
-                        "Published Date": paper.published.strftime('%Y-%m-%d %H:%M:%S'),
-                        "Summary": paper.summary,
-                        "ArXiv URL": paper.entry_id,
-                        "PDF URL": paper.pdf_url if paper.pdf_url else "",
-                        "ArXiv ID": paper.entry_id.split('/')[-1],
-                        "Timestamp": datetime.now().isoformat()
-                    }
-                    if insert_paper(paper_data):
-                        papers_logged_this_run += 1
-                
-                print(f"Logged {papers_logged_this_run} new papers in this run.")
-
+                perform_search_and_log(arxiv_keywords, arxiv_max_results)
+            
         except Exception as e:
             print(f"An unexpected error occurred during a bot run: {e}")
         finally:
@@ -185,14 +202,19 @@ def run_scheduled_bot():
             time.sleep(sleep_duration_seconds)
 
 
-# --- Flask Routes (Web Endpoints) ---
+# flask Routes (Web Endpoints) 
+
+
 @app.route('/', methods=['GET'])
 def index():
-    """Main page to display logged papers and manage keywords."""
     papers = get_all_papers()
     config = load_config()
     arxiv_keywords = ", ".join(config.get("arxiv_keywords", []))
-    return render_template('index.html', papers=papers, current_keywords=arxiv_keywords)
+    
+    # gets the last run timestamp and pass it to the template
+    last_researched_timestamp = get_last_run_timestamp()
+    
+    return render_template('index.html', papers=papers, current_keywords=arxiv_keywords, last_researched=last_researched_timestamp)
 
 @app.route('/save_keywords', methods=['POST'])
 def save_keywords_route():
@@ -209,24 +231,28 @@ def save_keywords_route():
 
 @app.route('/fetch_and_log')
 def fetch_and_log():
-    """Confirms that the bot is running in the background and redirects to the main page."""
-    print("Manual trigger received. The bot is running on a schedule in the background.")
+    """Triggers an immediate paper search and logging."""
+    config = load_config()
+    arxiv_keywords = config.get("arxiv_keywords", [])
+    arxiv_max_results = config.get("arxiv_max_results_per_run", 10)
+    
+    if not arxiv_keywords:
+        print("Error: Cannot perform manual fetch. 'arxiv_keywords' not found or empty in config.json.")
+    else:
+        perform_search_and_log(arxiv_keywords, arxiv_max_results)
+        
     return redirect(url_for('index'))
 
-
-# --- Main Execution Block ---
-# This block ensures the code runs only when the script is executed directly.
-
 if __name__ == "__main__":
-    # NEW: Create a new thread for the bot's scheduled logic
-    bot_thread = threading.Thread(target=run_scheduled_bot)
     
-    # Start the bot thread. It will now run in the background.
-    bot_thread.start()
-    
-    # Initialize the database before the application starts
+    # starts the bot thread
     init_db()
     
+    bot_thread = threading.Thread(target=run_scheduled_bot)
+    bot_thread.start()
+    
+    
     print("Starting Flask Research Paper Bot...")
-    # Run the Flask development server in the main thread
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # starts my web server
+    app.run(debug=True)
+

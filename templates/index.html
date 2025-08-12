@@ -1,107 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Basic meta tags for character set and responsive design -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Page title, which appears in the browser tab -->
-    <title>The Research Pilot</title>
-
-    <!-- Tailwind CSS library for quick and easy styling -->
+    <title>The Researcher Pilot</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts link to use the Inter font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Custom CSS styles. This is where the color is being defined. -->
     <style>
         body {
-            /* Sets the font for the entire page */
-            font-family: 'Georgia', serif;
-            /* Page's main background color */
-            background-color: #82b8dc; /* This color is applied here */
-            /* Default text color */
+            font-family: 'Inter', sans-serif; /* Changed font to a more common web app font */
+            background-color: #82b8dc;
             color: #315463;
         }
         .container {
-            /* Ensures the content container doesn't get too wide on large screens */
             max-width: 1200px;
         }
         .header {
-            /* Background color for the page header */
-            background-color: #1e3b8b; /* This color is applied here */
-            /* Text color inside the header */
-            color: rgb(164, 167, 218);
+            background-color: #1e3b8b; 
+            color: #FFFFFF;
         }
         .btn {
-            /* Default background and text color for buttons */
-            background-color: #3b82f6; 
-            color: white;
-            /* Smooth transition effect for color changes */
+            background-color: #1e3b8b;
+            color: white; /* General color for all elements with .btn class */
             transition: background-color 0.3s ease;
         }
         .btn:hover {
-            /* Background color for buttons when the mouse hovers over them */
-            background-color: #86a5e8; /* This color is applied here on hover */
+            background-color: #b39efbd0; 
+            color: #1e3b8b;
+        }
+        a.btn {
+            color: white; /* This specifically targets the 'a' tag with the .btn class */
+        }
+        a.btn:hover {
+            color: #1e3b8b; /* This makes sure the hover color still works for the link */
         }
         .table-header {
-            /* Background and text color for the table's header row */
-            background-color: #bbd2ff; /* This color is applied here */
+            background-color: #bbd2ff; 
             color: #5d7da8;
         }
         .table-row:nth-child(odd) {
-            /* Background color for every other table row, starting with the first */
-            background-color: #b39efbd0; /* This color is applied to odd rows */
+            background-color: #b39efbd0; 
         }
         .table-row:nth-child(even) {
-            /* Background color for the even table rows, creating a striped effect */
-            background-color: #7ba5cb; /* This color is applied to even rows */
+            background-color: rgb(164, 167, 218);
         }
     </style>
 </head>
 <body class="p-4">
-    <!-- Main content container, centered and with a drop shadow -->
     <div class="container mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-        <!-- Page header section -->
         <header class="header p-6 rounded-t-lg">
             <h1 class="text-3xl font-bold text-center mb-2">The Research Pilot</h1>
-            <p class="text-center text-lg">The bot that researches 24/7, so YOU don't have to.</p>
+            <p class="text-center text-lg"> Stay ahead of the curve. Your personal research bot for discovering the latest Tech and Engineering advancements, 24/7.</p>
         </header>
 
         <div class="p-6">
-            <!-- New: Keyword Management Section -->
-            <!-- This form allows the user to input and save new keywords -->
-            <div class="bg-gray-100 p-4 rounded-lg mb-6 shadow-sm">
-                <h3 class="text-xl font-semibold mb-2 text-gray-800">Manage Keywords</h3>
-                <!-- Displays the keywords that are currently loaded from config.json -->
-                <!-- The 'current_keywords' variable is what populates this text. -->
-                <p class="text-sm text-gray-600 mb-4">Current Keywords: <span class="font-medium text-gray-900/50">{{ current_keywords }}</span></p>
-                
-                <!-- The form element that will send data to our Flask app -->
-                <!-- action="{{ url_for('save_keywords_route') }}" specifies the Flask function to handle this form -->
-                <!-- method="post" is used because we are submitting data to the server -->
-                <form action="{{ url_for('save_keywords_route') }}" method="post" class="flex gap-4 items-center">
-                    <!-- The input field where the user will type keywords -->
-                    <!-- The 'name' attribute is crucial, as Flask uses it to identify this data -->
-                    <!-- 'value="{{ current_keywords }}"' ensures the input box is pre-populated with the saved keywords. -->
-                    <input type="text" name="keywords" placeholder="Enter keywords separated by commas" class="flex-grow p-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ current_keywords }}">
-                    
-                    <!-- The button to submit the form data to the server -->
-                    <button type="submit" class="btn px-4 py-2 rounded-md font-semibold shadow-md">
+            <!-- Manage Keywords Section -->
+            <div class="bg-gray-100 p-6 rounded-lg mb-6">
+                <h3 class="text-2xl font-semibold text-gray-700 mb-2">Manage Keywords</h3>
+                <!-- The keywords are now passed as a single string from the backend, so we display it directly -->
+                <p class="text-sm text-gray-500 mb-4">Current Keywords: <span class="font-medium text-gray-900/50">{{ current_keywords }}</span></p>
+                <form action="/save_keywords" method="post" class="flex gap-4 items">
+                    <!-- The input field now correctly uses the 'current_keywords' variable from the backend -->
+                    <input type="text" name="keywords" value="{{ current_keywords }}" placeholder="e.g., control systems, computer engineering" class="flex-grow p-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                    <button type="submit" class="btn px-6 py-3 rounded-full font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75">
                         Save Keywords
                     </button>
                 </form>
             </div>
-
-            <!-- Existing: Logged Papers Section -->
+            <!-- Logged Papers Section -->
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-semibold text-gray-800">Logged Papers</h2>
-                <!-- Link to trigger the bot's search function -->
+                {% if last_researched %}
+                <p class="text-sm text-gray-500">Last researched: {{ last_researched }}</p>
+                {% endif %}
                 <a href="{{ url_for('fetch_and_log') }}" class="btn px-6 py-3 rounded-full font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75">
                     Fetch & Log New Papers
                 </a>
             </div>
 
-            <!-- The conditional block is back. The table will only be shown if there are papers. -->
             {% if papers %}
             <div class="overflow-x-auto rounded-lg border border-gray-200">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -117,18 +93,15 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
-                        <!-- Jinja2 loop: iterates through each paper in the list passed from Flask -->
                         {% for paper in papers %}
                         <tr class="table-row">
-                            <!-- Jinja2 expression: inserts the value of the paper's title here -->
                             <td class="px-6 py-4 whitespace-normal text-sm font-medium text-gray-900">{{ paper.title }}</td>
                             <td class="px-6 py-4 whitespace-normal text-sm text-gray-500">{{ paper.authors }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ paper.published_date }}</td>
                             <td class="px-6 py-4 whitespace-normal text-sm text-gray-500 max-w-xs overflow-hidden text-ellipsis">{{ paper.summary | truncate(200, True) }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ paper.arxiv_id }}</td>
+                            
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="{{ paper.arxiv_url }}" target="_blank" class="text-blue-600 hover:text-blue-900 mr-2"></a>
-                                <!-- Conditional Jinja2: only displays the PDF link if a URL exists -->
                                 {% if paper.pdf_url %}
                                 <a href="{{ paper.pdf_url }}" target="_blank" class="text-blue-600 hover:text-blue-900">PDF</a>
                                 {% endif %}
@@ -140,7 +113,6 @@
                 </table>
             </div>
             {% else %}
-            <!-- This block is shown if there are no papers in the database -->
             <p class="text-center text-gray-600 text-lg py-8">No papers logged yet. Click "Fetch & Log New Papers" to get started!</p>
             {% endif %}
         </div>
