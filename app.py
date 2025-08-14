@@ -107,7 +107,8 @@ def save_config(config, config_path='config.json'):
 def search_arxiv(keywords, max_results):
     """Searches ArXiv for papers based on provided keywords."""
     # formats the keywords into a query string for the ArXiv API
-    query_string = " OR ".join([f"all:{keyword}" for keyword in keywords])
+    # THIS LINE HAS BEEN UPDATED to search only in the paper titles
+    query_string = " OR ".join([f"ti:{keyword}" for keyword in keywords])
     client = arxiv.Client()
     # create a search object with the specified query, max results, and sorting
     search = arxiv.Search(
@@ -252,4 +253,3 @@ if __name__ == "__main__":
     print("Starting Flask Research Paper Bot...")
     # running the Flask development server in the main thread
     app.run(debug=True, host='0.0.0.0', port=5000)
-
