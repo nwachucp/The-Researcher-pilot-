@@ -11,7 +11,6 @@ import threading
 
 
 app = Flask(__name__)
-# defining the name of my SQLite database file
 DATABASE = 'papers.db'
 LAST_RUN_TIMESTAMP_FILE = 'last_run_timestamp.txt'
 
@@ -21,7 +20,6 @@ def init_db():
     """initializes the SQLite database and creates the papers table if it doesn't exist."""
     with sqlite3.connect(DATABASE) as conn:
         cursor = conn.cursor()
-        # SQL command to create the 'papers' table.
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS papers (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -80,13 +78,13 @@ def get_all_papers():
         # convert the fetched rows into a list of dictionaries
         return [dict(row) for row in cursor.fetchall()]
 
-# config function
-# these functions manage the 'config.json' file for keywords and settings.
+
+# functions that manage my 'config.json' file for keywords and settings.
 
 def load_config(config_path='config.json'):
     """Loads configuration settings from a JSON file."""
     try:
-        # Open and read the config.json file
+        # open and reads the config.json file
         with open(config_path, 'r') as f:
             return json.load(f)
     except FileNotFoundError:
@@ -99,7 +97,7 @@ def load_config(config_path='config.json'):
 def save_config(config, config_path='config.json'):
     """Saves configuration settings to a JSON file."""
     try:
-        # Open the config.json file in write mode and dump the dictionary to it
+        # open the config.json file in write mode and dump the dictionary to it
         with open(config_path, 'w') as f:
             json.dump(config, f, indent=4)
     except Exception as e:
@@ -120,7 +118,7 @@ def search_arxiv(keywords, max_results):
     )
     results = []
     try:
-        # Fetch the results from the ArXiv client
+        # fetch the results from the ArXiv client
         for result in client.results(search):
             results.append(result)
     except Exception as e:
