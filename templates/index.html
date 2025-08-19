@@ -3,119 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Researcher Pilot</title>
+    <title>The Research Pilot</title>
+    <!-- Use Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Custom font from Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body {
-            font-family: 'Inter', sans-serif; /* Changed font to a more common web app font */
-            background-color: #82b8dc;
-            color: #315463;
+            font-family: 'Inter', sans-serif;
         }
-        .container {
-            max-width: 1200px;
+        /* Custom gradient background */
+        .gradient-bg {
+            background: linear-gradient(135deg, #b39efbd0 0%, #5d7da8 100%);
         }
-        .header {
-            background-color: #1e3b8b; 
-            color: #FFFFFF;
-        }
-        .btn {
-            background-color: #1e3b8b;
-            color: white; /* General color for all elements with .btn class */
+        /* Style for the button with a subtle hover effect */
+        .btn-purple {
+            background-color: #10007b; 
+            color: white;
             transition: background-color 0.3s ease;
         }
-        .btn:hover {
-            background-color: #b39efbd0; 
-            color: #1e3b8b;
-        }
-        a.btn {
-            color: white; /* This specifically targets the 'a' tag with the .btn class */
-        }
-        a.btn:hover {
-            color: #1e3b8b; /* This makes sure the hover color still works for the link */
-        }
-        .table-header {
-            background-color: #bbd2ff; 
-            color: #5d7da8;
-        }
-        .table-row:nth-child(odd) {
-            background-color: #b39efbd0; 
-        }
-        .table-row:nth-child(even) {
-            background-color: rgb(164, 167, 218);
+        .btn-purple:hover {
+            background-color: #ac8af0; /* A slightly darker purple on hover */
         }
     </style>
 </head>
-<body class="p-4">
-    <div class="container mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-        <header class="header p-6 rounded-t-lg">
-            <h1 class="text-3xl font-bold text-center mb-2">The Research Pilot</h1>
-            <p class="text-center text-lg"> Stay ahead of the curve. Your personal research bot for discovering the latest Tech and Engineering advancements, 24/7.</p>
-        </header>
+<body class="gradient-bg flex items-center justify-center min-h-screen">
 
-        <div class="p-6">
-            <!-- Manage Keywords Section -->
-            <div class="bg-gray-100 p-6 rounded-lg mb-6">
-                <h3 class="text-2xl font-semibold text-gray-700 mb-2">Manage Keywords</h3>
-                <!-- The keywords are now passed as a single string from the backend, so we display it directly -->
-                <p class="text-sm text-gray-500 mb-4">Current Keywords: <span class="font-medium text-gray-900/50">{{ current_keywords }}</span></p>
-                <form action="/save_keywords" method="post" class="flex gap-4 items">
-                    <!-- The input field now correctly uses the 'current_keywords' variable from the backend -->
-                    <input type="text" name="keywords" value="{{ current_keywords }}" placeholder="e.g., control systems, computer engineering" class="flex-grow p-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-                    <button type="submit" class="btn px-6 py-3 rounded-full font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75">
-                        Save Keywords
-                    </button>
-                </form>
-            </div>
-            <!-- Logged Papers Section -->
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-semibold text-gray-800">Logged Papers</h2>
-                {% if last_researched %}
-                <p class="text-sm text-gray-500">Last researched: {{ last_researched }}</p>
-                {% endif %}
-                <a href="{{ url_for('fetch_and_log') }}" class="btn px-6 py-3 rounded-full font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75">
-                    Fetch & Log New Papers
-                </a>
-            </div>
+    <!-- Main content container, centered and responsive -->
+    <div class="bg-white text-gray-800 w-11/12 md:w-2/3 lg:w-1/2 p-8 md:p-12 rounded-3xl shadow-2xl flex flex-col items-center text-center border border-gray-200">
+        
+        <!-- Logo/Icon section (using an inline SVG for the bot icon) -->
+        <div class="mb-8">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-24 h-24 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 12h2m10 0h2M12 5v2m0 10v2M12 3a9 9 0 019 9-9 9 0 01-9 9 9 9 0 01-9-9 9 9 0 019-9z" />
+            </svg>
+        </div>
 
-            {% if papers %}
-            <div class="overflow-x-auto rounded-lg border border-gray-200">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="table-header">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tl-lg">Title</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Authors</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Published Date</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Summary</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">ArXiv ID</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Links</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tr-lg">Logged At</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200">
-                        {% for paper in papers %}
-                        <tr class="table-row">
-                            <td class="px-6 py-4 whitespace-normal text-sm font-medium text-gray-900">{{ paper.title }}</td>
-                            <td class="px-6 py-4 whitespace-normal text-sm text-gray-500">{{ paper.authors }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ paper.published_date }}</td>
-                            <td class="px-6 py-4 whitespace-normal text-sm text-gray-500 max-w-xs overflow-hidden text-ellipsis">{{ paper.summary | truncate(200, True) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ paper.arxiv_id }}</td>
-                            
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                {% if paper.pdf_url %}
-                                <a href="{{ paper.pdf_url }}" target="_blank" class="text-blue-600 hover:text-blue-900">PDF</a>
-                                {% endif %}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ paper.timestamp }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <!-- Title and subtitle -->
+        <h1 class="text-4xl md:text-5xl font-bold mb-2 text-gray-900">The Research Pilot</h1>
+        <h2 class="text-lg md:text-xl text-gray-600 font-semibold mb-8">Your Personal Automated Engineering Research Bot</h2>
+        
+        <!-- Call-to-action button -->
+        <a href="/dashboard" class="btn-purple py-3 px-8 rounded-full text-lg font-bold shadow-lg transform transition-transform duration-300 hover:scale-105">
+            View Your Bot
+        </a>
+
+        <!-- Features section -->
+        <div class="mt-12 w-full">
+            <h3 class="text-2xl font-bold mb-6 text-gray-900">Key Features</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 md:gap-y-6 text-left">
+                <!-- Each feature listed with a bullet point and bold text -->
+                <div class="flex items-center space-x-3">
+                    <span class="text-purple-600 text-2xl">•</span>
+                    <p class="text-base font-medium">
+                        <strong class="font-bold text-gray-900">Automated Discovery:</strong> Finds the latest groundbreaking papers from the Top Engineering and science databases: Arxiv, ACM, and IEEE Xplore.
+                    </p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="text-purple-600 text-2xl">•</span>
+                    <p class="text-base font-medium">
+                        <strong class="font-bold text-gray-900">Customizable Keywords:</strong> Uses a relevance-ranking algorithm to pull the top 10 most related papers from your chosen keywords.
+                    </p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="text-purple-600 text-2xl">•</span>
+                    <p class="text-base font-medium">
+                        <strong class="font-bold text-gray-900">Real-Time Logging:</strong> Searches for new papers every hour and logs them in seconds.
+                    </p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="text-purple-600 text-2xl">•</span>
+                    <p class="text-base font-medium">
+                        <strong class="font-bold text-gray-900">Simple & Clean UI:</strong> No clutter, just the data you need.
+                    </p>
+                </div>
             </div>
-            {% else %}
-            <p class="text-center text-gray-600 text-lg py-8">No papers logged yet. Click "Fetch & Log New Papers" to get started!</p>
-            {% endif %}
         </div>
     </div>
+
 </body>
 </html>

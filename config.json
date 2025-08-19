@@ -1,10 +1,5 @@
 {
-  "arxiv_keywords": [
-    "MOD-PC",
-    "edge AI",
-    "robotics",
-    "machine learning",
-  ],
-  "arxiv_max_results_per_run": 20,
-  "sleep_duration_hours": 4
+    "arxiv_keywords": [
+        "reinforcement learning"
+    ]
 }

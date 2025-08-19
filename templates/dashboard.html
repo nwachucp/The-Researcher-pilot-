@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Researcher Pilot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif; /* Changed font to a more common web app font */
+            background-color: #82b8dc;
+            color: #315463;
+        }
+        .container {
+            max-width: 1200px;
+        }
+        .header {
+            background-color: #1e3b8b; 
+            color: #FFFFFF;
+        }
+        .btn {
+            background-color: #1e3b8b;
+            color: white; /* General color for all elements with .btn class */
+            transition: background-color 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #b39efbd0; 
+            color: #1e3b8b;
+        }
+        a.btn {
+            color: white; /* This specifically targets the 'a' tag with the .btn class */
+        }
+        a.btn:hover {
+            color: #1e3b8b; /* This makes sure the hover color still works for the link */
+        }
+        .table-header {
+            background-color: #bbd2ff; 
+            color: #5d7da8;
+        }
+        .table-row:nth-child(odd) {
+            background-color: #b39efbd0; 
+        }
+        .table-row:nth-child(even) {
+            background-color: rgb(164, 167, 218);
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div class="container mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+        <header class="header p-6 rounded-t-lg">
+            <h1 class="text-3xl font-bold text-center mb-2">The Research Pilot</h1>
+            <p class="text-center text-lg"> Stay ahead of the curve. Your personal research bot for discovering the latest Tech and Engineering advancements, 24/7.</p>
+        </header>
+
+        <div class="p-6">
+            <!-- Manage Keywords Section -->
+            <div class="bg-gray-100 p-6 rounded-lg mb-6">
+                <h3 class="text-2xl font-semibold text-gray-700 mb-2">Manage Keywords</h3>
+                <!-- The keywords are now passed as a single string from the backend, so we display it directly -->
+                <p class="text-sm text-gray-500 mb-4">Current Keywords: <span class="font-medium text-gray-900/50">{{ current_keywords }}</span></p>
+                <form action="/save_keywords" method="post" class="flex gap-4 items">
+                    <!-- The input field now correctly uses the 'current_keywords' variable from the backend -->
+                    <input type="text" name="keywords" value="{{ current_keywords }}" placeholder="e.g., control systems, computer engineering" class="flex-grow p-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                    <button type="submit" class="btn px-6 py-3 rounded-full font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75">
+                        Save Keywords
+                    </button>
+                </form>
+            </div>
+            <!-- Logged Papers Section -->
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800">Logged Papers</h2>
+                {% if last_researched %}
+                <p class="text-sm text-gray-500">Last researched: {{ last_researched }}</p>
+                {% endif %}
+                <a href="{{ url_for('fetch_and_log') }}" class="btn px-6 py-3 rounded-full font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75">
+                    Fetch & Log New Papers
+                </a>
+            </div>
+
+            {% if papers %}
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="table-header">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tl-lg">Title</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Authors</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Published Date</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Summary</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Links</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tr-lg">Logged At</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for paper in papers %}
+                        <tr class="table-row">
+                            <td class="px-6 py-4 whitespace-normal text-sm font-medium text-gray-900">{{ paper.title }}</td>
+                            <td class="px-6 py-4 whitespace-normal text-sm text-gray-500">{{ paper.authors }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ paper.published_date }}</td>
+                            <td class="px-6 py-4 whitespace-normal text-sm text-gray-500 max-w-xs overflow-hidden text-ellipsis">{{ paper.summary | truncate(200, True) }}</td>
+                            
+                            
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                {% if paper.pdf_url %}
+                                <a href="{{ paper.pdf_url }}" target="_blank" class="text-blue-600 hover:text-blue-900">PDF</a>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ paper.timestamp }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-center text-gray-600 text-lg py-8">No papers logged yet. Click "Fetch & Log New Papers" to get started!</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
