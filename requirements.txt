@@ -2,3 +2,4 @@ arxiv
 python-dotenv
 Flask 
 gunicorn 
+schedule
